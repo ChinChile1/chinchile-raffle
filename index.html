@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChinChile Raffle Shuffler</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at 50% 0%, #1d2b53 0%, #0b1026 70%);
+    color: #fff; min-height: 100vh; overflow-x: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px 16px;
+  }
+  h1 { font-size: clamp(2.8rem, 7vw, 4.4rem); font-weight: 900; letter-spacing: -2px;
+    text-align:center; line-height: 1.02; text-transform: uppercase;
+    background: linear-gradient(95deg,#ffd166 0%,#ff9f1c 30%,#ef476f 60%,#ffd166 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 6px 26px rgba(255,150,40,.35));
+    animation: shine 5s linear infinite; }
+  @keyframes shine { to { background-position: 200% center; } }
+  h1 .small { display:block; font-size: .32em; letter-spacing: 8px; font-weight:700;
+    -webkit-text-fill-color:#9aa7d0; margin-top: 4px; }
+  .sub { color: #9aa7d0; margin-top: 6px; font-size: .95rem; text-align:center; }
+  .panel-title { margin: 26px 0 8px; font-size:.8rem; letter-spacing:1.5px; text-transform:uppercase; color:#9aa7d0; }
+  .list {
+    width: min(560px,92vw); max-height: 240px; overflow-y: auto;
+    background: rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12);
+    border-radius:14px; padding:10px;
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:4px 14px;
+  }
+  .list .p { font-size:.9rem; color:#cdd6f4; padding:3px 6px; border-radius:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .list .p:nth-child(odd){ background: rgba(255,255,255,.03); }
+  .list::-webkit-scrollbar{ width:9px; }
+  .list::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.2); border-radius:9px; }
+  .reel {
+    margin: 28px auto 10px; width: min(560px,92vw); height: 92px;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 16px; display:flex; align-items:center; justify-content:center;
+    font-size: 2rem; font-weight: 700; overflow:hidden; position:relative;
+    box-shadow: inset 0 0 40px rgba(0,0,0,.35);
+  }
+  .reel .name { white-space: nowrap; }
+  button.start {
+    margin-top: 20px; padding: 16px 44px; font-size: 1.15rem; font-weight: 800;
+    border: none; border-radius: 999px; cursor: pointer; color: #1d2b53;
+    background: linear-gradient(90deg,#ffd166,#ff9f1c); letter-spacing:.3px;
+    box-shadow: 0 8px 24px rgba(255,159,28,.4); transition: transform .12s, box-shadow .12s;
+  }
+  button.start:hover { transform: translateY(-2px); box-shadow:0 12px 30px rgba(255,159,28,.55); }
+  button.start:active { transform: translateY(0); }
+  button.start:disabled { opacity:.5; cursor:not-allowed; filter:grayscale(.3); }
+  button.reset {
+    margin-top: 14px; padding: 9px 22px; font-size:.9rem; font-weight:600;
+    background: transparent; color:#9aa7d0; border:1px solid rgba(255,255,255,.2);
+    border-radius:999px; cursor:pointer;
+  }
+  .winners { margin-top: 34px; width: min(620px,94vw); display:flex; flex-direction:column; gap:18px; }
+  .winner {
+    display:flex; align-items:center; gap:20px; padding:24px 28px; border-radius:18px;
+    background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
+    opacity:0; transform: translateY(18px) scale(.94); transition: all .55s cubic-bezier(.2,.8,.2,1);
+  }
+  .winner.show { opacity:1; transform:none; }
+  .winner .place { font-size: 2.8rem; min-width: 60px; text-align:center; line-height:1; }
+  .winner .who { font-size: 2.1rem; font-weight: 900; letter-spacing:-.5px; line-height:1.1; }
+  .winner .meta { font-size:.8rem; margin-top:6px; letter-spacing:2px; text-transform:uppercase; font-weight:700; }
+  /* 1st place — biggest, glowing, animated */
+  .winner.p1 {
+    padding:34px 30px; border-radius:22px;
+    background: linear-gradient(100deg, rgba(255,209,102,.32), rgba(239,71,111,.18) 60%, rgba(255,255,255,.05));
+    border:2px solid rgba(255,209,102,.75);
+    box-shadow: 0 0 0 1px rgba(255,209,102,.25), 0 14px 50px rgba(255,180,40,.35);
+    animation: glow 1.8s ease-in-out infinite alternate;
+  }
+  .winner.p1 .place { font-size: 3.6rem; filter: drop-shadow(0 4px 10px rgba(255,180,40,.6)); }
+  .winner.p1 .who {
+    font-size: 2.8rem;
+    background: linear-gradient(90deg,#fff,#ffe9a8,#fff);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow: 0 2px 20px rgba(255,209,102,.4);
+  }
+  .winner.p1 .meta { color:#ffd166; }
+  @keyframes glow {
+    from { box-shadow: 0 0 0 1px rgba(255,209,102,.25), 0 14px 50px rgba(255,180,40,.30); }
+    to   { box-shadow: 0 0 0 1px rgba(255,209,102,.45), 0 18px 64px rgba(255,180,40,.55); }
+  }
+  .winner.p2 { background: linear-gradient(100deg, rgba(199,210,254,.22), rgba(255,255,255,.05)); border-color: rgba(199,210,254,.5); }
+  .winner.p2 .meta { color:#c7d2fe; }
+  .winner.p3 { background: linear-gradient(100deg, rgba(255,159,28,.2), rgba(255,255,255,.05)); border-color: rgba(255,159,28,.5); }
+  .winner.p3 .meta { color:#ff9f1c; }
+  canvas#confetti { position: fixed; inset:0; pointer-events:none; z-index: 50; }
+  .logo-badge {
+    width: 116px; height: 116px; border-radius: 50%; margin-bottom: 14px;
+    background: radial-gradient(circle at 50% 38%, #ffffff 0%, #f3f0e8 70%, #e6e0d2 100%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 10px 30px rgba(0,0,0,.45), 0 0 0 3px rgba(255,209,102,.55), 0 0 26px rgba(255,180,40,.35);
+  }
+  .logo-badge img { width: 84%; height: 84%; object-fit: contain; }
+</style>
+</head>
+<body>
+  <div class="logo-badge" id="logoBadge"><img src="chinchile_logo.png" alt="ChinChile logo" onerror="document.getElementById('logoBadge').style.display='none'"></div>
+  <h1>&#127881; Sorteo ChinChile &#127881;</h1>
+  <div class="sub" id="sub">Cargando participantes&hellip;</div>
+
+  <div class="panel-title" id="listTitle">Todos los participantes &mdash; una entrada cada uno</div>
+  <div class="list" id="list">
+    <div class="p">1. __jassier1513</div>
+    <div class="p">2. _cammyhc_</div>
+    <div class="p">3. _romi.ei_</div>
+    <div class="p">4. _valentinacv</div>
+    <div class="p">5. a.ntsni.a</div>
+    <div class="p">6. bambii_jk</div>
+    <div class="p">7. camilapaolaa</div>
+    <div class="p">8. carla.navarro.1000</div>
+    <div class="p">9. caro_quezada</div>
+    <div class="p">10. carola.gc</div>
+    <div class="p">11. claudio.neira.7</div>
+    <div class="p">12. dafneee__12</div>
+    <div class="p">13. danitzita</div>
+    <div class="p">14. dirisdelia2006</div>
+    <div class="p">15. fvidal94</div>
+    <div class="p">16. gabi.carvacho</div>
+    <div class="p">17. gonkisk8</div>
+    <div class="p">18. gonza_fam</div>
+    <div class="p">19. griceel._</div>
+    <div class="p">20. guzmanpaolaandreafuentes</div>
+    <div class="p">21. hija.de.venus.ink</div>
+    <div class="p">22. ivanpm8.5</div>
+    <div class="p">23. j_valenzuela88</div>
+    <div class="p">24. jamieg.523</div>
+    <div class="p">25. janysgnzl</div>
+    <div class="p">26. javiera_mrl</div>
+    <div class="p">27. javierrsilvaa</div>
+    <div class="p">28. jessicamunozavendano</div>
+    <div class="p">29. jo_a1708</div>
+    <div class="p">30. joo01k_</div>
+    <div class="p">31. julisssandrea</div>
+    <div class="p">32. kataynono</div>
+    <div class="p">33. lenia_berdeguez</div>
+    <div class="p">34. leslyeealonsoo</div>
+    <div class="p">35. lindalaminga</div>
+    <div class="p">36. litlenestbaby</div>
+    <div class="p">37. luisdm_popu30</div>
+    <div class="p">38. luvk.y_</div>
+    <div class="p">39. marsrebgov</div>
+    <div class="p">40. matiasiuanis</div>
+    <div class="p">41. mexxheee</div>
+    <div class="p">42. mom_carlos_ra</div>
+    <div class="p">43. mossinails_</div>
+    <div class="p">44. myp_poolluxury</div>
+    <div class="p">45. negrita_mayito</div>
+    <div class="p">46. ortega_family_united</div>
+    <div class="p">47. patanapatita</div>
+    <div class="p">48. paulacorderocalderon</div>
+    <div class="p">49. pauliiwis</div>
+    <div class="p">50. pri_realtormiami</div>
+    <div class="p">51. priscila_hahn_realestate</div>
+    <div class="p">52. pvalencia1985</div>
+    <div class="p">53. santosjasmine_</div>
+    <div class="p">54. sarita_valematu</div>
+    <div class="p">55. seth92bm</div>
+    <div class="p">56. shhmolly</div>
+    <div class="p">57. somoslosgm</div>
+    <div class="p">58. taniacaro_e</div>
+    <div class="p">59. unpocodemitrendevida</div>
+    <div class="p">60. vale.e.e.e</div>
+    <div class="p">61. vale_vale_quezada</div>
+    <div class="p">62. valentinniitaa_</div>
+    <div class="p">63. valossita</div>
+    <div class="p">64. vazquezalonsoyoilan</div>
+    <div class="p">65. vivianbasult</div>
+    <div class="p">66. vvalentina.gonzalez</div>
+    <div class="p">67. xhileymontenegro</div>
+  </div>
+
+  <div class="reel"><span class="name" id="reel">Listo para sortear</span></div>
+  <button class="start" id="startBtn">INICIAR SORTEO</button>
+  <br><button class="reset" id="resetBtn" style="display:none">Sortear de nuevo</button>
+
+  <div class="winners" id="winners"></div>
+
+  <canvas id="confetti"></canvas>
+
+<script>
+const ENTRIES = [{"name": "__jassier1513", "entries": 1}, {"name": "_cammyhc_", "entries": 1}, {"name": "_romi.ei_", "entries": 1}, {"name": "_valentinacv", "entries": 1}, {"name": "a.ntsni.a", "entries": 1}, {"name": "bambii_jk", "entries": 1}, {"name": "camilapaolaa", "entries": 1}, {"name": "carla.navarro.1000", "entries": 1}, {"name": "caro_quezada", "entries": 1}, {"name": "carola.gc", "entries": 1}, {"name": "claudio.neira.7", "entries": 1}, {"name": "dafneee__12", "entries": 1}, {"name": "danitzita", "entries": 1}, {"name": "dirisdelia2006", "entries": 1}, {"name": "fvidal94", "entries": 1}, {"name": "gabi.carvacho", "entries": 1}, {"name": "gonkisk8", "entries": 1}, {"name": "gonza_fam", "entries": 1}, {"name": "griceel._", "entries": 1}, {"name": "guzmanpaolaandreafuentes", "entries": 1}, {"name": "hija.de.venus.ink", "entries": 1}, {"name": "ivanpm8.5", "entries": 1}, {"name": "j_valenzuela88", "entries": 1}, {"name": "jamieg.523", "entries": 1}, {"name": "janysgnzl", "entries": 1}, {"name": "javiera_mrl", "entries": 1}, {"name": "javierrsilvaa", "entries": 1}, {"name": "jessicamunozavendano", "entries": 1}, {"name": "jo_a1708", "entries": 1}, {"name": "joo01k_", "entries": 1}, {"name": "julisssandrea", "entries": 1}, {"name": "kataynono", "entries": 1}, {"name": "lenia_berdeguez", "entries": 1}, {"name": "leslyeealonsoo", "entries": 1}, {"name": "lindalaminga", "entries": 1}, {"name": "litlenestbaby", "entries": 1}, {"name": "luisdm_popu30", "entries": 1}, {"name": "luvk.y_", "entries": 1}, {"name": "marsrebgov", "entries": 1}, {"name": "matiasiuanis", "entries": 1}, {"name": "mexxheee", "entries": 1}, {"name": "mom_carlos_ra", "entries": 1}, {"name": "mossinails_", "entries": 1}, {"name": "myp_poolluxury", "entries": 1}, {"name": "negrita_mayito", "entries": 1}, {"name": "ortega_family_united", "entries": 1}, {"name": "patanapatita", "entries": 1}, {"name": "paulacorderocalderon", "entries": 1}, {"name": "pauliiwis", "entries": 1}, {"name": "pri_realtormiami", "entries": 1}, {"name": "priscila_hahn_realestate", "entries": 1}, {"name": "pvalencia1985", "entries": 1}, {"name": "santosjasmine_", "entries": 1}, {"name": "sarita_valematu", "entries": 1}, {"name": "seth92bm", "entries": 1}, {"name": "shhmolly", "entries": 1}, {"name": "somoslosgm", "entries": 1}, {"name": "taniacaro_e", "entries": 1}, {"name": "unpocodemitrendevida", "entries": 1}, {"name": "vale.e.e.e", "entries": 1}, {"name": "vale_vale_quezada", "entries": 1}, {"name": "valentinniitaa_", "entries": 1}, {"name": "valossita", "entries": 1}, {"name": "vazquezalonsoyoilan", "entries": 1}, {"name": "vivianbasult", "entries": 1}, {"name": "vvalentina.gonzalez", "entries": 1}, {"name": "xhileymontenegro", "entries": 1}];
+// Unweighted: each unique participant gets exactly one entry
+const NAMES = ENTRIES.map(e => e.name).sort((a,b)=> a.toLowerCase().localeCompare(b.toLowerCase()));
+
+document.getElementById('sub').textContent =
+  NAMES.length + " participantes · una entrada cada uno · mismas probabilidades";
+
+const reel = document.getElementById('reel');
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const winnersEl = document.getElementById('winners');
+
+const PLACES = [
+  {label:'\u{1F947}', cls:'p1', word:'1er lugar'},
+  {label:'\u{1F948}', cls:'p2', word:'2do lugar'},
+  {label:'\u{1F949}', cls:'p3', word:'3er lugar'},
+];
+
+async function drawOne(remaining, placeIdx){
+  const winner = remaining[Math.floor(Math.random()*remaining.length)];
+  const dur = 1500 + placeIdx*400;
+  const start = performance.now();
+  await new Promise(res=>{
+    function frame(t){
+      const elapsed = t - start;
+      reel.textContent = remaining[Math.floor(Math.random()*remaining.length)];
+      if(elapsed < dur) setTimeout(()=>requestAnimationFrame(frame), elapsed>dur*0.7?110:45);
+      else res();
+    }
+    requestAnimationFrame(frame);
+  });
+  reel.textContent = winner;
+  const card = document.createElement('div');
+  card.className = 'winner ' + PLACES[placeIdx].cls;
+  card.innerHTML = '<div class="place">'+PLACES[placeIdx].label+'</div>'+
+    '<div><div class="who">'+winner+'</div><div class="meta">'+PLACES[placeIdx].word+'</div></div>';
+  winnersEl.appendChild(card);
+  requestAnimationFrame(()=>card.classList.add('show'));
+  burst();
+  return remaining.filter(n=>n!==winner);
+}
+
+async function runDraw(){
+  startBtn.disabled = true;
+  winnersEl.innerHTML = '';
+  document.getElementById('list').style.display = 'none';
+  document.getElementById('listTitle').style.display = 'none';
+  let remaining = NAMES.slice();
+  for(let i=0;i<3 && remaining.length>0;i++){
+    remaining = await drawOne(remaining, i);
+    await new Promise(r=>setTimeout(r,500));
+  }
+  reel.textContent = '\u{1F389} \u{A1}Ganadores! \u{1F389}';
+  finale();
+  resetBtn.style.display = 'inline-block';
+}
+
+startBtn.addEventListener('click', runDraw);
+resetBtn.addEventListener('click', ()=>{
+  winnersEl.innerHTML=''; reel.textContent='Listo para sortear';
+  document.getElementById('list').style.display='';
+  document.getElementById('listTitle').style.display='';
+  startBtn.disabled=false; resetBtn.style.display='none';
+});
+
+/* ---------- Confetti ---------- */
+const cv = document.getElementById('confetti');
+const ctx = cv.getContext('2d');
+let parts = [];
+function resize(){ cv.width=innerWidth; cv.height=innerHeight; }
+resize(); addEventListener('resize', resize);
+const COLORS=['#ffd166','#ef476f','#06d6a0','#118ab2','#ff9f1c','#ffffff'];
+function burst(){
+  for(let i=0;i<90;i++){
+    parts.push({x:innerWidth/2,y:innerHeight*0.4,
+      vx:(Math.random()-.5)*12, vy:Math.random()*-14-4,
+      g:.35+Math.random()*.2, s:5+Math.random()*6,
+      c:COLORS[Math.floor(Math.random()*COLORS.length)],
+      rot:Math.random()*6, vr:(Math.random()-.5)*.4, life:120});
+  }
+}
+function finale(){
+  for(let k=0;k<3;k++) setTimeout(()=>{
+    for(let i=0;i<120;i++){
+      parts.push({x:Math.random()*innerWidth, y:-10,
+        vx:(Math.random()-.5)*6, vy:Math.random()*4+2,
+        g:.18+Math.random()*.15, s:5+Math.random()*6,
+        c:COLORS[Math.floor(Math.random()*COLORS.length)],
+        rot:Math.random()*6, vr:(Math.random()-.5)*.4, life:200});
+    }
+  }, k*350);
+}
+function loop(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  parts.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.vy+=p.g; p.rot+=p.vr; p.life--;
+    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+    ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore();
+  });
+  parts = parts.filter(p=>p.life>0 && p.y<cv.height+20);
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
