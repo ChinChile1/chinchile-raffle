@@ -9,59 +9,51 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(circle at 50% 0%, #1d2b53 0%, #0b1026 70%);
-    color: #fff; min-height: 100vh; display: flex; flex-direction: column;
-    align-items: center; justify-content: flex-start; padding: 28px 18px 60px;
+    background: linear-gradient(165deg, #0a0a0a 0%, #1c1c1c 55%, #313131 100%);
+    background-attachment: fixed;
+    color: #f4f4f4; min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start; padding: 40px 20px 60px;
   }
-  .badge { width: 92px; height: 92px; border-radius: 50%; margin-bottom: 14px;
-    background: radial-gradient(circle at 50% 38%, #fff 0%, #f3f0e8 70%, #e6e0d2 100%);
-    display:flex; align-items:center; justify-content:center;
-    box-shadow: 0 8px 24px rgba(0,0,0,.45), 0 0 0 3px rgba(255,209,102,.55), 0 0 22px rgba(255,180,40,.35); }
-  .badge img { width:84%; height:84%; object-fit:contain; }
-  h1 { font-size: clamp(2rem, 9vw, 2.9rem); font-weight: 900; letter-spacing: -1.5px; text-align:center;
-    text-transform: uppercase; line-height: 1.02;
-    background: linear-gradient(95deg,#ffd166,#ff9f1c 40%,#ef476f 70%,#ffd166);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    filter: drop-shadow(0 4px 18px rgba(255,150,40,.35)); }
-  .city { margin-top: 6px; font-size: 1rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color:#ffd166; }
-  .tag { margin-top: 4px; color:#9aa7d0; font-size:.9rem; text-align:center; }
-  form { width: 100%; max-width: 440px; margin-top: 26px; display:flex; flex-direction:column; gap:14px; }
-  label { font-size:.82rem; color:#c7d2fe; font-weight:700; letter-spacing:.5px; margin-bottom:-6px; }
+  .logo { width: 210px; max-width: 66%; height: auto; margin-bottom: 22px; display:block; }
+  .logo-fallback { font-size: 2rem; font-weight: 900; letter-spacing: 1px; color:#fff; margin-bottom: 18px; text-align:center; }
+  .city { font-size: .95rem; font-weight: 700; letter-spacing: 5px; text-transform: uppercase; color:#bdbdbd; }
+  .tag { margin-top: 10px; color:#8f8f8f; font-size:.92rem; text-align:center; max-width: 380px; line-height:1.5; }
+  form { width: 100%; max-width: 420px; margin-top: 30px; display:flex; flex-direction:column; gap:15px; }
+  label { font-size:.78rem; color:#a8a8a8; font-weight:600; letter-spacing:.6px; margin-bottom:-6px; text-transform:uppercase; }
   input {
-    width:100%; padding:17px 16px; font-size:1.15rem; border-radius:14px;
-    border:1.5px solid rgba(255,255,255,.16); background:rgba(255,255,255,.07); color:#fff;
+    width:100%; padding:17px 16px; font-size:1.1rem; border-radius:10px;
+    border:1px solid #3a3a3a; background:#141414; color:#fff;
     outline:none; transition:border-color .15s, background .15s;
   }
-  input::placeholder { color:#8390b8; }
-  input:focus { border-color:#ffd166; background:rgba(255,255,255,.11); }
+  input::placeholder { color:#6a6a6a; }
+  input:focus { border-color:#e0e0e0; background:#191919; }
   button {
-    margin-top:6px; padding:19px; font-size:1.25rem; font-weight:900; letter-spacing:.5px;
-    border:none; border-radius:999px; cursor:pointer; color:#1d2b53;
-    background: linear-gradient(90deg,#ffd166,#ff9f1c);
-    box-shadow: 0 10px 26px rgba(255,159,28,.45); transition: transform .1s, opacity .15s;
+    margin-top:10px; padding:18px; font-size:1.15rem; font-weight:800; letter-spacing:.4px;
+    border:none; border-radius:10px; cursor:pointer;
+    background:#ffffff; color:#000000; transition: transform .1s, opacity .15s, background .15s;
   }
-  button:active { transform: scale(.98); }
-  button:disabled { opacity:.55; cursor:default; }
-  .consent { margin-top:2px; font-size:.78rem; color:#8390b8; text-align:center; line-height:1.5; }
-  .err { display:none; margin-top:8px; padding:12px 14px; border-radius:12px; font-size:.92rem;
-    background: rgba(239,71,111,.15); border:1px solid rgba(239,71,111,.5); color:#ffd0dc; text-align:center; }
+  button:hover { background:#ececec; }
+  button:active { transform: scale(.985); }
+  button:disabled { opacity:.5; cursor:default; }
+  .consent { margin-top:2px; font-size:.75rem; color:#7c7c7c; text-align:center; line-height:1.55; }
+  .err { display:none; margin-top:8px; padding:12px 14px; border-radius:10px; font-size:.9rem;
+    background:#241414; border:1px solid #6b2b2b; color:#ffb4b4; text-align:center; }
   .success { position:fixed; inset:0; z-index:40; display:none; flex-direction:column;
     align-items:center; justify-content:center; text-align:center; padding:30px;
-    background: radial-gradient(circle at 50% 30%, #17306b 0%, #0b1026 75%); }
+    background: linear-gradient(165deg, #0a0a0a 0%, #1c1c1c 55%, #313131 100%); }
   .success.show { display:flex; }
-  .success .big { font-size: clamp(2.4rem,11vw,4rem); font-weight:900; text-transform:uppercase; letter-spacing:-1px;
-    background: linear-gradient(95deg,#ffd166,#ff9f1c,#ef476f,#ffd166); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .success .who { margin-top:14px; font-size:1.5rem; font-weight:800; }
-  .success .sub2 { margin-top:10px; color:#c7d2fe; font-size:1.05rem; }
-  .again { margin-top:34px; padding:15px 34px; font-size:1rem; font-weight:800; border-radius:999px; border:1.5px solid rgba(255,255,255,.25);
-    background:transparent; color:#fff; cursor:pointer; letter-spacing:.5px; }
+  .success .big { font-size: clamp(2.2rem,10vw,3.4rem); font-weight:900; letter-spacing:-.5px; color:#fff; }
+  .success .who { margin-top:14px; font-size:1.4rem; font-weight:700; color:#e6e6e6; }
+  .success .sub2 { margin-top:10px; color:#9a9a9a; font-size:1.02rem; }
+  .again { margin-top:34px; padding:14px 32px; font-size:1rem; font-weight:700; border-radius:10px; border:1px solid #4a4a4a;
+    background:transparent; color:#fff; cursor:pointer; letter-spacing:.4px; }
   canvas#cf { position:fixed; inset:0; pointer-events:none; z-index:50; }
 </style>
 </head>
 <body>
-  <div class="badge" id="badge"><img src="chinchile_logo.png" alt="ChinChile" onerror="document.getElementById('badge').style.display='none'"></div>
-  <h1>&#127881; Sorteo ChinChile</h1>
-  <div class="city">Miami</div>
+  <img class="logo" src="logo.png" alt="ChinChile" onerror="this.style.display='none';document.getElementById('lf').style.display='block';">
+  <div class="logo-fallback" id="lf" style="display:none;">ChinChile</div>
+  <div class="city">Sorteo &middot; Miami</div>
   <div class="tag">Ingresa tus datos para participar &mdash; &iexcl;mucha suerte!</div>
 
   <form id="f" autocomplete="on" novalidate>
@@ -79,7 +71,7 @@
   </form>
 
   <div class="success" id="success">
-    <div class="big">&#127881; &iexcl;Est&aacute;s participando! &#127881;</div>
+    <div class="big">&#127881; &iexcl;Est&aacute;s participando!</div>
     <div class="who" id="successName"></div>
     <div class="sub2">Te avisaremos si ganas. &iexcl;Mucha suerte!</div>
     <button class="again" id="again">Participar otra persona</button>
@@ -98,61 +90,44 @@ const errEl = document.getElementById('err');
 const btn = document.getElementById('submit');
 
 function backup(entry){
-  try{
-    const k = "chinchile_entries_"+CITY;
-    const arr = JSON.parse(localStorage.getItem(k) || "[]");
-    arr.push(entry); localStorage.setItem(k, JSON.stringify(arr));
-  }catch(e){}
+  try{ const k="chinchile_entries_"+CITY; const arr=JSON.parse(localStorage.getItem(k)||"[]"); arr.push(entry); localStorage.setItem(k,JSON.stringify(arr)); }catch(e){}
 }
-
 async function subscribe(name, email){
-  const payload = { data:{ type:"subscription", attributes:{
+  const payload={ data:{ type:"subscription", attributes:{
     custom_source:"Event Raffle - "+CITY,
-    profile:{ data:{ type:"profile", attributes:{
-      email: email, first_name: name,
-      properties:{ event_city: CITY, raffle_event: "ChinChile "+CITY+" 2026" }
-    }}}
-  }, relationships:{ list:{ data:{ type:"list", id: LIST_ID } } } } };
+    profile:{ data:{ type:"profile", attributes:{ email:email, first_name:name,
+      properties:{ event_city:CITY, raffle_event:"ChinChile "+CITY+" 2026" } }}}
+  }, relationships:{ list:{ data:{ type:"list", id:LIST_ID } } } } };
   return fetch("https://a.klaviyo.com/client/subscriptions/?company_id="+COMPANY_ID, {
-    method:"POST", headers:{"revision":REVISION,"content-type":"application/json"}, body: JSON.stringify(payload)
-  });
+    method:"POST", headers:{"revision":REVISION,"content-type":"application/json"}, body:JSON.stringify(payload) });
 }
-
 f.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  errEl.style.display='none';
-  const name = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
+  e.preventDefault(); errEl.style.display='none';
+  const name=document.getElementById('name').value.trim();
+  const email=document.getElementById('email').value.trim();
   if(!name){ showErr("Por favor ingresa tu nombre."); return; }
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showErr("Por favor ingresa un correo válido."); return; }
-
-  btn.disabled = true; btn.textContent = "ENVIANDO…";
+  btn.disabled=true; btn.textContent="ENVIANDO…";
   backup({name,email,ts:new Date().toISOString()});
   try{
-    const r = await subscribe(name, email);
-    if(r.ok){ win(name); }
-    else { showErr("No se pudo registrar (código "+r.status+"). Intenta de nuevo."); }
-  }catch(ex){
-    showErr("Sin conexión. Revisa el internet e intenta de nuevo.");
-  }finally{
-    btn.disabled=false; btn.textContent="PARTICIPAR";
-  }
+    const r=await subscribe(name,email);
+    if(r.ok){ win(name); } else { showErr("No se pudo registrar (código "+r.status+"). Intenta de nuevo."); }
+  }catch(ex){ showErr("Sin conexión. Revisa el internet e intenta de nuevo."); }
+  finally{ btn.disabled=false; btn.textContent="PARTICIPAR"; }
 });
-
 function showErr(m){ errEl.textContent=m; errEl.style.display='block'; }
 function win(name){
   document.getElementById('successName').textContent = name ? ("¡Gracias, "+name+"!") : "";
-  document.getElementById('success').classList.add('show');
-  burst(); f.reset();
-  clearTimeout(window.__t); window.__t = setTimeout(reset, 6000);
+  document.getElementById('success').classList.add('show'); burst(); f.reset();
+  clearTimeout(window.__t); window.__t=setTimeout(reset,6000);
 }
 function reset(){ document.getElementById('success').classList.remove('show'); document.getElementById('name').focus(); }
 document.getElementById('again').addEventListener('click', reset);
 
 const cv=document.getElementById('cf'), ctx=cv.getContext('2d'); let P=[];
 function size(){cv.width=innerWidth;cv.height=innerHeight;} size(); addEventListener('resize',size);
-const C=['#ffd166','#ef476f','#06d6a0','#118ab2','#ff9f1c','#fff'];
-function burst(){ for(let i=0;i<160;i++){P.push({x:innerWidth/2,y:innerHeight*0.35,vx:(Math.random()-.5)*14,vy:Math.random()*-15-3,g:.32+Math.random()*.2,s:5+Math.random()*7,c:C[Math.floor(Math.random()*C.length)],r:Math.random()*6,vr:(Math.random()-.5)*.4,life:150});} }
+const C=['#ffffff','#dcdcdc','#b5b5b5','#8f8f8f','#f0f0f0'];
+function burst(){ for(let i=0;i<150;i++){P.push({x:innerWidth/2,y:innerHeight*0.32,vx:(Math.random()-.5)*14,vy:Math.random()*-15-3,g:.32+Math.random()*.2,s:5+Math.random()*6,c:C[Math.floor(Math.random()*C.length)],r:Math.random()*6,vr:(Math.random()-.5)*.4,life:150});} }
 function loop(){ ctx.clearRect(0,0,cv.width,cv.height); P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.r+=p.vr;p.life--;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);ctx.restore();}); P=P.filter(p=>p.life>0&&p.y<cv.height+20); requestAnimationFrame(loop);} loop();
 </script>
 </body>
