@@ -34,7 +34,6 @@
   }
   input::placeholder { color:#8390b8; }
   input:focus { border-color:#ffd166; background:rgba(255,255,255,.11); }
-  .opt { color:#8390b8; font-weight:600; }
   button {
     margin-top:6px; padding:19px; font-size:1.25rem; font-weight:900; letter-spacing:.5px;
     border:none; border-radius:999px; cursor:pointer; color:#1d2b53;
@@ -46,7 +45,6 @@
   .consent { margin-top:2px; font-size:.78rem; color:#8390b8; text-align:center; line-height:1.5; }
   .err { display:none; margin-top:8px; padding:12px 14px; border-radius:12px; font-size:.92rem;
     background: rgba(239,71,111,.15); border:1px solid rgba(239,71,111,.5); color:#ffd0dc; text-align:center; }
-  /* success overlay */
   .success { position:fixed; inset:0; z-index:40; display:none; flex-direction:column;
     align-items:center; justify-content:center; text-align:center; padding:30px;
     background: radial-gradient(circle at 50% 30%, #17306b 0%, #0b1026 75%); }
@@ -75,10 +73,6 @@
       <label for="email">Correo electr&oacute;nico</label>
       <input id="email" name="email" type="email" inputmode="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" required>
     </div>
-    <div>
-      <label for="phone">Tel&eacute;fono <span class="opt">(opcional)</span></label>
-      <input id="phone" name="phone" type="tel" inputmode="tel" placeholder="(305) 555-1234" autocomplete="tel">
-    </div>
     <button id="submit" type="submit">PARTICIPAR</button>
     <div class="consent">Al participar aceptas recibir correos de ChinChile. Puedes darte de baja cuando quieras.</div>
     <div class="err" id="err"></div>
@@ -103,15 +97,6 @@ const f = document.getElementById('f');
 const errEl = document.getElementById('err');
 const btn = document.getElementById('submit');
 
-function normalizePhoneE164(raw){
-  if(!raw) return null;
-  const d = raw.replace(/[^\d]/g,'');
-  if(d.length === 10) return "+1"+d;
-  if(d.length === 11 && d[0]==="1") return "+"+d;
-  if(raw.trim().startsWith("+") && d.length>=8 && d.length<=15) return "+"+d;
-  return null; // not confidently valid -> won't send as phone_number
-}
-
 function backup(entry){
   try{
     const k = "chinchile_entries_"+CITY;
@@ -120,23 +105,17 @@ function backup(entry){
   }catch(e){}
 }
 
-async function subscribe(payload){
-  return fetch("https://a.klaviyo.com/client/subscriptions/?company_id="+COMPANY_ID, {
-    method:"POST",
-    headers:{"revision":REVISION,"content-type":"application/json"},
-    body: JSON.stringify(payload)
-  });
-}
-
-function buildPayload(name, email, phoneE164, phoneRaw){
-  const props = { event_city: CITY, raffle_event: "ChinChile "+CITY+" 2026" };
-  if(phoneRaw) props.phone = phoneRaw;
-  const attrs = { email: email, first_name: name, properties: props };
-  if(phoneE164) attrs.phone_number = phoneE164;
-  return { data:{ type:"subscription", attributes:{
+async function subscribe(name, email){
+  const payload = { data:{ type:"subscription", attributes:{
     custom_source:"Event Raffle - "+CITY,
-    profile:{ data:{ type:"profile", attributes: attrs } }
+    profile:{ data:{ type:"profile", attributes:{
+      email: email, first_name: name,
+      properties:{ event_city: CITY, raffle_event: "ChinChile "+CITY+" 2026" }
+    }}}
   }, relationships:{ list:{ data:{ type:"list", id: LIST_ID } } } } };
+  return fetch("https://a.klaviyo.com/client/subscriptions/?company_id="+COMPANY_ID, {
+    method:"POST", headers:{"revision":REVISION,"content-type":"application/json"}, body: JSON.stringify(payload)
+  });
 }
 
 f.addEventListener('submit', async (e)=>{
@@ -144,19 +123,13 @@ f.addEventListener('submit', async (e)=>{
   errEl.style.display='none';
   const name = document.getElementById('name').value.trim();
   const email = document.getElementById('email').value.trim();
-  const phoneRaw = document.getElementById('phone').value.trim();
   if(!name){ showErr("Por favor ingresa tu nombre."); return; }
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showErr("Por favor ingresa un correo válido."); return; }
 
   btn.disabled = true; btn.textContent = "ENVIANDO…";
-  const phoneE164 = normalizePhoneE164(phoneRaw);
-  backup({name,email,phone:phoneRaw,ts:new Date().toISOString()});
-
+  backup({name,email,ts:new Date().toISOString()});
   try{
-    let r = await subscribe(buildPayload(name,email,phoneE164,phoneRaw));
-    if(!r.ok && phoneE164){ // retry without phone_number if it caused a rejection
-      r = await subscribe(buildPayload(name,email,null,phoneRaw));
-    }
+    const r = await subscribe(name, email);
     if(r.ok){ win(name); }
     else { showErr("No se pudo registrar (código "+r.status+"). Intenta de nuevo."); }
   }catch(ex){
@@ -167,23 +140,15 @@ f.addEventListener('submit', async (e)=>{
 });
 
 function showErr(m){ errEl.textContent=m; errEl.style.display='block'; }
-
 function win(name){
   document.getElementById('successName').textContent = name ? ("¡Gracias, "+name+"!") : "";
   document.getElementById('success').classList.add('show');
-  burst();
-  // reset form for the next person
-  f.reset();
-  clearTimeout(window.__t);
-  window.__t = setTimeout(reset, 6000);
+  burst(); f.reset();
+  clearTimeout(window.__t); window.__t = setTimeout(reset, 6000);
 }
-function reset(){
-  document.getElementById('success').classList.remove('show');
-  document.getElementById('name').focus();
-}
+function reset(){ document.getElementById('success').classList.remove('show'); document.getElementById('name').focus(); }
 document.getElementById('again').addEventListener('click', reset);
 
-/* confetti */
 const cv=document.getElementById('cf'), ctx=cv.getContext('2d'); let P=[];
 function size(){cv.width=innerWidth;cv.height=innerHeight;} size(); addEventListener('resize',size);
 const C=['#ffd166','#ef476f','#06d6a0','#118ab2','#ff9f1c','#fff'];
