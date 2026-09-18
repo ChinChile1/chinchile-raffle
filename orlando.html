@@ -17,9 +17,10 @@
   .logo { width: 210px; max-width: 66%; height: auto; margin-bottom: 22px; display:block; }
   .logo-fallback { font-size: 2rem; font-weight: 900; letter-spacing: 1px; color:#fff; margin-bottom: 18px; text-align:center; }
   .city { font-size: .95rem; font-weight: 700; letter-spacing: 5px; text-transform: uppercase; color:#bdbdbd; }
-  .tag { margin-top: 10px; color:#8f8f8f; font-size:.92rem; text-align:center; max-width: 380px; line-height:1.5; }
+  .tag { margin-top: 10px; color:#8f8f8f; font-size:.9rem; text-align:center; max-width: 400px; line-height:1.5; }
   form { width: 100%; max-width: 420px; margin-top: 30px; display:flex; flex-direction:column; gap:15px; }
-  label { font-size:.78rem; color:#a8a8a8; font-weight:600; letter-spacing:.6px; margin-bottom:-6px; text-transform:uppercase; }
+  label { font-size:.78rem; color:#a8a8a8; font-weight:600; letter-spacing:.5px; margin-bottom:-6px; }
+  label .en { color:#6f6f6f; font-weight:500; }
   input {
     width:100%; padding:17px 16px; font-size:1.1rem; border-radius:10px;
     border:1px solid #3a3a3a; background:#141414; color:#fff;
@@ -35,16 +36,16 @@
   button:hover { background:#ececec; }
   button:active { transform: scale(.985); }
   button:disabled { opacity:.5; cursor:default; }
-  .consent { margin-top:2px; font-size:.75rem; color:#7c7c7c; text-align:center; line-height:1.55; }
+  .consent { margin-top:2px; font-size:.72rem; color:#7c7c7c; text-align:center; line-height:1.55; }
   .err { display:none; margin-top:8px; padding:12px 14px; border-radius:10px; font-size:.9rem;
     background:#241414; border:1px solid #6b2b2b; color:#ffb4b4; text-align:center; }
   .success { position:fixed; inset:0; z-index:40; display:none; flex-direction:column;
     align-items:center; justify-content:center; text-align:center; padding:30px;
     background: linear-gradient(165deg, #0a0a0a 0%, #1c1c1c 55%, #313131 100%); }
   .success.show { display:flex; }
-  .success .big { font-size: clamp(2.2rem,10vw,3.4rem); font-weight:900; letter-spacing:-.5px; color:#fff; }
+  .success .big { font-size: clamp(2rem,9vw,3.2rem); font-weight:900; letter-spacing:-.5px; color:#fff; line-height:1.1; }
   .success .who { margin-top:14px; font-size:1.4rem; font-weight:700; color:#e6e6e6; }
-  .success .sub2 { margin-top:10px; color:#9a9a9a; font-size:1.02rem; }
+  .success .sub2 { margin-top:10px; color:#9a9a9a; font-size:1rem; line-height:1.5; }
   .again { margin-top:34px; padding:14px 32px; font-size:1rem; font-weight:700; border-radius:10px; border:1px solid #4a4a4a;
     background:transparent; color:#fff; cursor:pointer; letter-spacing:.4px; }
   canvas#cf { position:fixed; inset:0; pointer-events:none; z-index:50; }
@@ -54,31 +55,31 @@
   <img class="logo" src="logo.png" alt="ChinChile" onerror="this.style.display='none';document.getElementById('lf').style.display='block';">
   <div class="logo-fallback" id="lf" style="display:none;">ChinChile</div>
   <div class="city">Sorteo &middot; Orlando</div>
-  <div class="tag">Ingresa tus datos para participar &mdash; &iexcl;mucha suerte!</div>
+  <div class="tag">Ingresa tus datos para participar &mdash; &iexcl;mucha suerte!<br>Enter to win &mdash; good luck!</div>
 
   <form id="f" autocomplete="on" novalidate>
     <div>
-      <label for="fname">Nombre</label>
-      <input id="fname" name="fname" type="text" placeholder="Tu nombre" autocomplete="given-name" required>
+      <label for="fname">Nombre <span class="en">/ First name</span></label>
+      <input id="fname" name="fname" type="text" placeholder="Nombre / First name" autocomplete="given-name" required>
     </div>
     <div>
-      <label for="lname">Apellido</label>
-      <input id="lname" name="lname" type="text" placeholder="Tu apellido" autocomplete="family-name" required>
+      <label for="lname">Apellido <span class="en">/ Last name</span></label>
+      <input id="lname" name="lname" type="text" placeholder="Apellido / Last name" autocomplete="family-name" required>
     </div>
     <div>
-      <label for="email">Correo electr&oacute;nico</label>
+      <label for="email">Correo <span class="en">/ Email</span></label>
       <input id="email" name="email" type="email" inputmode="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" required>
     </div>
-    <button id="submit" type="submit">PARTICIPAR</button>
-    <div class="consent">Al participar aceptas recibir correos de ChinChile. Puedes darte de baja cuando quieras.</div>
+    <button id="submit" type="submit">PARTICIPAR &middot; ENTER</button>
+    <div class="consent">Al participar aceptas recibir correos de ChinChile. / By entering you agree to receive emails from ChinChile.</div>
     <div class="err" id="err"></div>
   </form>
 
   <div class="success" id="success">
-    <div class="big">&#127881; &iexcl;Est&aacute;s participando!</div>
+    <div class="big">&#127881; &iexcl;Est&aacute;s participando!<br>You&rsquo;re entered!</div>
     <div class="who" id="successName"></div>
-    <div class="sub2">Te avisaremos si ganas. &iexcl;Mucha suerte!</div>
-    <button class="again" id="again">Participar otra persona</button>
+    <div class="sub2">Te avisaremos si ganas. &iexcl;Mucha suerte!<br>We&rsquo;ll email you if you win. Good luck!</div>
+    <button class="again" id="again">Participar otra persona / Enter someone else</button>
   </div>
 
   <canvas id="cf"></canvas>
@@ -110,20 +111,20 @@ f.addEventListener('submit', async (e)=>{
   const fname=document.getElementById('fname').value.trim();
   const lname=document.getElementById('lname').value.trim();
   const email=document.getElementById('email').value.trim();
-  if(!fname){ showErr("Por favor ingresa tu nombre."); return; }
-  if(!lname){ showErr("Por favor ingresa tu apellido."); return; }
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showErr("Por favor ingresa un correo válido."); return; }
-  btn.disabled=true; btn.textContent="ENVIANDO…";
+  if(!fname){ showErr("Ingresa tu nombre. / Please enter your first name."); return; }
+  if(!lname){ showErr("Ingresa tu apellido. / Please enter your last name."); return; }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showErr("Ingresa un correo válido. / Please enter a valid email."); return; }
+  btn.disabled=true; btn.textContent="ENVIANDO… / SENDING…";
   backup({fname,lname,email,ts:new Date().toISOString()});
   try{
     const r=await subscribe(fname,lname,email);
-    if(r.ok){ win(fname); } else { showErr("No se pudo registrar (código "+r.status+"). Intenta de nuevo."); }
-  }catch(ex){ showErr("Sin conexión. Revisa el internet e intenta de nuevo."); }
-  finally{ btn.disabled=false; btn.textContent="PARTICIPAR"; }
+    if(r.ok){ win(fname); } else { showErr("No se pudo registrar / Could not register (código "+r.status+"). Intenta de nuevo / Try again."); }
+  }catch(ex){ showErr("Sin conexión. Revisa el internet / No connection. Check your internet."); }
+  finally{ btn.disabled=false; btn.textContent="PARTICIPAR · ENTER"; }
 });
 function showErr(m){ errEl.textContent=m; errEl.style.display='block'; }
 function win(fname){
-  document.getElementById('successName').textContent = fname ? ("¡Gracias, "+fname+"!") : "";
+  document.getElementById('successName').textContent = fname ? ("¡Gracias / Thanks, "+fname+"!") : "";
   document.getElementById('success').classList.add('show'); burst(); f.reset();
   clearTimeout(window.__t); window.__t=setTimeout(reset,6000);
 }
