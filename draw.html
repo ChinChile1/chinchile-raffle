@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorteo ChinChile — Draw</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(165deg,#0a0a0a 0%,#1c1c1c 55%,#313131 100%); background-attachment:fixed;
+    color:#f4f4f4; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:34px 18px 80px; }
+  .logo { width:180px; max-width:60%; height:auto; margin-bottom:16px; }
+  .logo-fallback { font-size:1.8rem; font-weight:900; color:#fff; margin-bottom:14px; }
+  h1 { font-size:clamp(1.9rem,6vw,2.8rem); font-weight:900; letter-spacing:-1px; text-transform:uppercase; text-align:center; color:#fff; }
+  .sub { color:#9a9a9a; margin-top:6px; font-size:.95rem; text-align:center; }
+
+  .panel { width:min(620px,94vw); margin-top:26px; background:rgba(255,255,255,.05); border:1px solid #333; border-radius:16px; padding:20px; }
+  .panel h2 { font-size:.8rem; letter-spacing:2px; text-transform:uppercase; color:#9a9a9a; margin-bottom:12px; font-weight:700; }
+  .drop { border:1.5px dashed #4a4a4a; border-radius:12px; padding:22px; text-align:center; color:#bdbdbd; cursor:pointer; transition:border-color .15s,background .15s; }
+  .drop:hover, .drop.over { border-color:#fff; background:rgba(255,255,255,.04); }
+  .drop b { color:#fff; }
+  .or { text-align:center; color:#6a6a6a; margin:14px 0 10px; font-size:.85rem; letter-spacing:1px; }
+  textarea { width:100%; min-height:110px; background:#141414; border:1px solid #3a3a3a; border-radius:10px; color:#fff; padding:12px 14px; font-size:.95rem; resize:vertical; outline:none; }
+  textarea:focus { border-color:#e0e0e0; }
+  .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:16px; }
+  .row label { font-size:.9rem; color:#c8c8c8; }
+  select, .loadbtn { background:#141414; border:1px solid #3a3a3a; color:#fff; border-radius:10px; padding:10px 14px; font-size:1rem; }
+  .loadbtn { cursor:pointer; font-weight:700; }
+  .count { margin-top:14px; color:#dcdcdc; font-size:.95rem; }
+  .list { margin-top:12px; max-height:180px; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:2px 14px; }
+  .list .p { font-size:.85rem; color:#cfcfcf; padding:2px 4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .list .p:nth-child(odd){ background:rgba(255,255,255,.03); }
+
+  .reel { margin:26px auto 6px; width:min(620px,94vw); height:88px; background:rgba(255,255,255,.06); border:1px solid #333; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; font-weight:800; overflow:hidden; }
+  button.start { margin-top:16px; padding:17px 46px; font-size:1.15rem; font-weight:800; border:none; border-radius:10px; cursor:pointer; background:#fff; color:#000; }
+  button.start:disabled { opacity:.4; cursor:not-allowed; }
+  button.reset { margin-top:12px; padding:9px 22px; font-size:.9rem; font-weight:600; background:transparent; color:#9a9a9a; border:1px solid #444; border-radius:10px; cursor:pointer; }
+  .winners { margin-top:26px; width:min(620px,94vw); display:flex; flex-direction:column; gap:14px; }
+  .winner { display:flex; align-items:center; gap:18px; padding:22px 24px; border-radius:14px; background:rgba(255,255,255,.06); border:1px solid #3a3a3a; opacity:0; transform:translateY(14px) scale(.96); transition:all .5s cubic-bezier(.2,.8,.2,1); }
+  .winner.show { opacity:1; transform:none; }
+  .winner .place { font-size:2.4rem; min-width:54px; text-align:center; }
+  .winner .who { font-size:1.5rem; font-weight:800; color:#fff; }
+  .winner .meta { font-size:.85rem; color:#9a9a9a; margin-top:3px; }
+  .winner.p1 { background:rgba(255,255,255,.1); border-color:#e6e6e6; }
+  canvas#cf { position:fixed; inset:0; pointer-events:none; z-index:50; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+  <img class="logo" src="logo.png" alt="ChinChile" onerror="this.style.display='none';document.getElementById('lf').style.display='block';">
+  <div class="logo-fallback hidden" id="lf" style="display:none;">ChinChile</div>
+  <h1>Sorteo ChinChile</h1>
+  <div class="sub">Carga los participantes y sortea los ganadores</div>
+
+  <div class="panel" id="loader">
+    <h2>Cargar participantes</h2>
+    <div class="drop" id="drop">Arrastra el <b>CSV de Klaviyo</b> aqu&iacute;, o <b>haz clic para elegir archivo</b>
+      <input type="file" id="file" accept=".csv,text/csv" style="display:none">
+    </div>
+    <div class="or">— O PEGA LOS NOMBRES / CORREOS (uno por l&iacute;nea) —</div>
+    <textarea id="paste" placeholder="María Pérez, maria@ejemplo.com&#10;Juan Soto, juan@ejemplo.com&#10;..."></textarea>
+    <div class="row">
+      <button class="loadbtn" id="loadPaste">Cargar pegados</button>
+      <label>Ganadores: <select id="numWin"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></label>
+      <label><input type="checkbox" id="dedupe" checked> Quitar duplicados</label>
+    </div>
+    <div class="count" id="count"></div>
+    <div class="list" id="list"></div>
+  </div>
+
+  <div class="reel"><span id="reel">Carga la lista para comenzar</span></div>
+  <button class="start" id="startBtn" disabled>INICIAR SORTEO</button>
+  <br><button class="reset hidden" id="resetBtn">Sortear de nuevo</button>
+
+  <div class="winners" id="winners"></div>
+  <canvas id="cf"></canvas>
+
+<script>
+let ENTRIES = []; // {name, email}
+const $ = id => document.getElementById(id);
+
+/* ---------- CSV parsing ---------- */
+function parseCSV(text){
+  const rows=[]; let i=0, field='', row=[], q=false;
+  while(i<text.length){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){field+='"';i++;} else q=false; }
+      else field+=c;
+    } else {
+      if(c==='"') q=true;
+      else if(c===','){ row.push(field); field=''; }
+      else if(c==='\n'||c==='\r'){ if(field!==''||row.length){ row.push(field); rows.push(row); row=[]; field=''; } if(c==='\r'&&text[i+1]==='\n')i++; }
+      else field+=c;
+    }
+    i++;
+  }
+  if(field!==''||row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r=>r.length && r.some(x=>x.trim()!==''));
+}
+function fromCSV(text){
+  const rows=parseCSV(text); if(!rows.length) return [];
+  const header=rows[0].map(h=>h.trim().toLowerCase());
+  const emailIdx=header.findIndex(h=>h==='email'||h.includes('email'));
+  const fnIdx=header.findIndex(h=>h==='first name'||h==='first_name'||h==='nombre'||h==='name');
+  const lnIdx=header.findIndex(h=>h==='last name'||h==='last_name'||h==='apellido');
+  const hasHeader = emailIdx>-1 || fnIdx>-1;
+  const start = hasHeader ? 1 : 0;
+  const out=[];
+  for(let r=start;r<rows.length;r++){
+    const cols=rows[r];
+    let name = fnIdx>-1 ? (cols[fnIdx]||'').trim() : '';
+    if(lnIdx>-1 && (cols[lnIdx]||'').trim()) name = (name+' '+cols[lnIdx].trim()).trim();
+    let email = emailIdx>-1 ? (cols[emailIdx]||'').trim() : '';
+    if(!hasHeader){ // no header: guess - use whole line
+      const line=cols.join(' ').trim();
+      const em=line.match(/[^\s,;]+@[^\s,;]+/);
+      email = em?em[0]:'';
+      name = line.replace(email,'').replace(/[,;]/g,' ').trim();
+    }
+    if(!name && email) name = email.split('@')[0];
+    if(name||email) out.push({name:name||email, email});
+  }
+  return out;
+}
+function fromPaste(text){
+  return text.split('\n').map(l=>l.trim()).filter(Boolean).map(line=>{
+    const em=line.match(/[^\s,;]+@[^\s,;]+/);
+    const email=em?em[0]:'';
+    let name=line.replace(email,'').replace(/[,;]+/g,' ').trim();
+    if(!name) name = email?email.split('@')[0]:line;
+    return {name, email};
+  });
+}
+function load(list){
+  if($('dedupe').checked){
+    const seen=new Set(); list=list.filter(e=>{ const k=(e.email||e.name).toLowerCase(); if(seen.has(k))return false; seen.add(k); return true; });
+  }
+  ENTRIES=list;
+  $('count').textContent = ENTRIES.length + " participantes cargados";
+  const lst=$('list'); lst.innerHTML='';
+  ENTRIES.forEach((e,i)=>{ const d=document.createElement('div'); d.className='p'; d.textContent=(i+1)+'. '+e.name; lst.appendChild(d); });
+  $('startBtn').disabled = ENTRIES.length===0;
+  $('reel').textContent = ENTRIES.length? 'Listo para sortear' : 'Carga la lista para comenzar';
+}
+
+/* ---------- inputs ---------- */
+const drop=$('drop');
+drop.addEventListener('click',()=>$('file').click());
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+drop.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) readFile(f); });
+$('file').addEventListener('change',e=>{ const f=e.target.files[0]; if(f) readFile(f); });
+function readFile(f){ const rd=new FileReader(); rd.onload=()=>{ load(fromCSV(rd.result)); }; rd.readAsText(f); }
+$('loadPaste').addEventListener('click',()=>{ const t=$('paste').value.trim(); if(t) load(fromPaste(t)); });
+$('dedupe').addEventListener('change',()=>{ if(ENTRIES.length) { /* re-dedupe not trivial; ask reload */ } });
+
+/* ---------- draw ---------- */
+const PLACES=[{l:'\u{1F947}',w:'1er lugar'},{l:'\u{1F948}',w:'2do lugar'},{l:'\u{1F949}',w:'3er lugar'},{l:'\u{1F3C5}',w:'4º'},{l:'\u{1F3C5}',w:'5º'},{l:'\u{1F3C5}',w:'6º'},{l:'\u{1F3C5}',w:'7º'},{l:'\u{1F3C5}',w:'8º'},{l:'\u{1F3C5}',w:'9º'},{l:'\u{1F3C5}',w:'10º'}];
+const reel=$('reel'), startBtn=$('startBtn'), resetBtn=$('resetBtn'), winnersEl=$('winners');
+
+async function drawOne(remaining, idx){
+  const winner=remaining[Math.floor(Math.random()*remaining.length)];
+  const dur=1400+idx*350, start=performance.now();
+  await new Promise(res=>{ function fr(t){ reel.textContent=remaining[Math.floor(Math.random()*remaining.length)].name; if(t-start<dur) setTimeout(()=>requestAnimationFrame(fr), (t-start)>dur*0.7?110:45); else res(); } requestAnimationFrame(fr); });
+  reel.textContent=winner.name;
+  const card=document.createElement('div'); card.className='winner '+(idx===0?'p1':'');
+  card.innerHTML='<div class="place">'+PLACES[idx].l+'</div><div><div class="who">'+esc(winner.name)+'</div><div class="meta">'+PLACES[idx].w+(winner.email?' · '+esc(winner.email):'')+'</div></div>';
+  winnersEl.appendChild(card); requestAnimationFrame(()=>card.classList.add('show')); burst();
+  return remaining.filter(x=>x!==winner);
+}
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+async function run(){
+  startBtn.disabled=true; winnersEl.innerHTML='';
+  $('loader').style.display='none';
+  let remaining=ENTRIES.slice();
+  const n=Math.min(parseInt($('numWin').value,10), remaining.length);
+  for(let i=0;i<n;i++){ remaining=await drawOne(remaining,i); await new Promise(r=>setTimeout(r,450)); }
+  reel.textContent='\u{1F389} ¡Ganadores!';
+  finale(); resetBtn.classList.remove('hidden');
+}
+startBtn.addEventListener('click',run);
+resetBtn.addEventListener('click',()=>{ winnersEl.innerHTML=''; reel.textContent='Listo para sortear'; startBtn.disabled=false; resetBtn.classList.add('hidden'); $('loader').style.display=''; });
+
+/* ---------- confetti ---------- */
+const cv=$('cf'),ctx=cv.getContext('2d');let P=[];
+function size(){cv.width=innerWidth;cv.height=innerHeight;}size();addEventListener('resize',size);
+const C=['#ffffff','#dcdcdc','#b5b5b5','#8f8f8f','#f0f0f0'];
+function burst(){for(let i=0;i<130;i++)P.push({x:innerWidth/2,y:innerHeight*0.35,vx:(Math.random()-.5)*13,vy:Math.random()*-14-3,g:.32+Math.random()*.2,s:5+Math.random()*6,c:C[Math.floor(Math.random()*C.length)],r:Math.random()*6,vr:(Math.random()-.5)*.4,life:150});}
+function finale(){for(let k=0;k<3;k++)setTimeout(()=>{for(let i=0;i<120;i++)P.push({x:Math.random()*innerWidth,y:-10,vx:(Math.random()-.5)*6,vy:Math.random()*4+2,g:.18+Math.random()*.14,s:5+Math.random()*6,c:C[Math.floor(Math.random()*C.length)],r:Math.random()*6,vr:(Math.random()-.5)*.4,life:200});},k*300);}
+function loop(){ctx.clearRect(0,0,cv.width,cv.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.r+=p.vr;p.life--;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);ctx.restore();});P=P.filter(p=>p.life>0&&p.y<cv.height+20);requestAnimationFrame(loop);}loop();
+</script>
+</body>
+</html>
