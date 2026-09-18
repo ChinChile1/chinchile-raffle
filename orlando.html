@@ -58,8 +58,12 @@
 
   <form id="f" autocomplete="on" novalidate>
     <div>
-      <label for="name">Nombre</label>
-      <input id="name" name="name" type="text" placeholder="Tu nombre" autocomplete="name" required>
+      <label for="fname">Nombre</label>
+      <input id="fname" name="fname" type="text" placeholder="Tu nombre" autocomplete="given-name" required>
+    </div>
+    <div>
+      <label for="lname">Apellido</label>
+      <input id="lname" name="lname" type="text" placeholder="Tu apellido" autocomplete="family-name" required>
     </div>
     <div>
       <label for="email">Correo electr&oacute;nico</label>
@@ -92,10 +96,10 @@ const btn = document.getElementById('submit');
 function backup(entry){
   try{ const k="chinchile_entries_"+CITY; const arr=JSON.parse(localStorage.getItem(k)||"[]"); arr.push(entry); localStorage.setItem(k,JSON.stringify(arr)); }catch(e){}
 }
-async function subscribe(name, email){
+async function subscribe(fname, lname, email){
   const payload={ data:{ type:"subscription", attributes:{
     custom_source:"Event Raffle - "+CITY,
-    profile:{ data:{ type:"profile", attributes:{ email:email, first_name:name,
+    profile:{ data:{ type:"profile", attributes:{ email:email, first_name:fname, last_name:lname,
       properties:{ event_city:CITY, raffle_event:"ChinChile "+CITY+" 2026" } }}}
   }, relationships:{ list:{ data:{ type:"list", id:LIST_ID } } } } };
   return fetch("https://a.klaviyo.com/client/subscriptions/?company_id="+COMPANY_ID, {
@@ -103,25 +107,27 @@ async function subscribe(name, email){
 }
 f.addEventListener('submit', async (e)=>{
   e.preventDefault(); errEl.style.display='none';
-  const name=document.getElementById('name').value.trim();
+  const fname=document.getElementById('fname').value.trim();
+  const lname=document.getElementById('lname').value.trim();
   const email=document.getElementById('email').value.trim();
-  if(!name){ showErr("Por favor ingresa tu nombre."); return; }
+  if(!fname){ showErr("Por favor ingresa tu nombre."); return; }
+  if(!lname){ showErr("Por favor ingresa tu apellido."); return; }
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showErr("Por favor ingresa un correo válido."); return; }
   btn.disabled=true; btn.textContent="ENVIANDO…";
-  backup({name,email,ts:new Date().toISOString()});
+  backup({fname,lname,email,ts:new Date().toISOString()});
   try{
-    const r=await subscribe(name,email);
-    if(r.ok){ win(name); } else { showErr("No se pudo registrar (código "+r.status+"). Intenta de nuevo."); }
+    const r=await subscribe(fname,lname,email);
+    if(r.ok){ win(fname); } else { showErr("No se pudo registrar (código "+r.status+"). Intenta de nuevo."); }
   }catch(ex){ showErr("Sin conexión. Revisa el internet e intenta de nuevo."); }
   finally{ btn.disabled=false; btn.textContent="PARTICIPAR"; }
 });
 function showErr(m){ errEl.textContent=m; errEl.style.display='block'; }
-function win(name){
-  document.getElementById('successName').textContent = name ? ("¡Gracias, "+name+"!") : "";
+function win(fname){
+  document.getElementById('successName').textContent = fname ? ("¡Gracias, "+fname+"!") : "";
   document.getElementById('success').classList.add('show'); burst(); f.reset();
   clearTimeout(window.__t); window.__t=setTimeout(reset,6000);
 }
-function reset(){ document.getElementById('success').classList.remove('show'); document.getElementById('name').focus(); }
+function reset(){ document.getElementById('success').classList.remove('show'); document.getElementById('fname').focus(); }
 document.getElementById('again').addEventListener('click', reset);
 
 const cv=document.getElementById('cf'), ctx=cv.getContext('2d'); let P=[];
