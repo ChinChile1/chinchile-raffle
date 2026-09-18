@@ -51,25 +51,25 @@
   <img class="logo" src="logo.png" alt="ChinChile" onerror="this.style.display='none';document.getElementById('lf').style.display='block';">
   <div class="logo-fallback hidden" id="lf" style="display:none;">ChinChile</div>
   <h1>Sorteo ChinChile</h1>
-  <div class="sub">Carga los participantes y sortea los ganadores</div>
+  <div class="sub">Load participants, then draw the winners</div>
 
   <div class="panel" id="loader">
-    <h2>Cargar participantes</h2>
-    <div class="drop" id="drop">Arrastra el <b>CSV de Klaviyo</b> aqu&iacute;, o <b>haz clic para elegir archivo</b>
+    <h2>Load participants</h2>
+    <div class="drop" id="drop">Drag your <b>Klaviyo CSV</b> here, or <b>click to choose a file</b>
       <input type="file" id="file" accept=".csv,text/csv" style="display:none">
     </div>
-    <div class="or">— O PEGA LOS NOMBRES / CORREOS (uno por l&iacute;nea) —</div>
+    <div class="or">— OR PASTE NAMES / EMAILS (one per line) —</div>
     <textarea id="paste" placeholder="María Pérez, maria@ejemplo.com&#10;Juan Soto, juan@ejemplo.com&#10;..."></textarea>
     <div class="row">
-      <button class="loadbtn" id="loadPaste">Cargar pegados</button>
-      <label>Ganadores: <select id="numWin"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></label>
-      <label><input type="checkbox" id="dedupe" checked> Quitar duplicados</label>
+      <button class="loadbtn" id="loadPaste">Load pasted</button>
+      <label>Winners: <select id="numWin"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></label>
+      <label><input type="checkbox" id="dedupe" checked> Remove duplicates</label>
     </div>
     <div class="count" id="count"></div>
     <div class="list" id="list"></div>
   </div>
 
-  <div class="reel"><span id="reel">Carga la lista para comenzar</span></div>
+  <div class="reel"><span id="reel">Load a list to begin</span></div>
   <button class="start" id="startBtn" disabled>INICIAR SORTEO</button>
   <br><button class="reset hidden" id="resetBtn">Sortear de nuevo</button>
 
@@ -138,11 +138,11 @@ function load(list){
     const seen=new Set(); list=list.filter(e=>{ const k=(e.email||e.name).toLowerCase(); if(seen.has(k))return false; seen.add(k); return true; });
   }
   ENTRIES=list;
-  $('count').textContent = ENTRIES.length + " participantes cargados";
+  $('count').textContent = ENTRIES.length + " participants loaded";
   const lst=$('list'); lst.innerHTML='';
   ENTRIES.forEach((e,i)=>{ const d=document.createElement('div'); d.className='p'; d.textContent=(i+1)+'. '+e.name; lst.appendChild(d); });
   $('startBtn').disabled = ENTRIES.length===0;
-  $('reel').textContent = ENTRIES.length? 'Listo para sortear' : 'Carga la lista para comenzar';
+  $('reel').textContent = ENTRIES.length? 'Listo para sortear' : 'Load a list to begin';
 }
 
 /* ---------- inputs ---------- */
